@@ -8,16 +8,9 @@ import {
   TouchableOpacity,
   Share,
   Alert,
-  Button,
+  ActivityIndicator,
 } from "react-native";
-import React, { useLayoutEffect } from "react";
-import {
-  Stack,
-  useLocalSearchParams,
-  useNavigation,
-  useRouter,
-  router,
-} from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import listingsData from "@/assets/data/airbnb-listings.json";
 import Colors from "@/constants/Colors";
 import {
@@ -29,6 +22,7 @@ import {
 } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 import { defaultStyles } from "@/constants/styles";
+import { useState } from "react";
 
 const { width } = Dimensions.get("window");
 const IMG_HEIGHT = 300;
@@ -36,7 +30,6 @@ const IMG_HEIGHT = 300;
 const ListingId = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const listing = (listingsData as any[]).find((item) => item.id === id);
-  const navigation = useNavigation();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollOffset = useScrollViewOffset(scrollRef);
 
@@ -70,7 +63,6 @@ const ListingId = () => {
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
           // shared with activity type of result.activityType
-          Alert.alert("Listing shared successfully");
         } else {
           Alert.alert("Listing shared successfully");
         }
@@ -80,11 +72,22 @@ const ListingId = () => {
     }
   };
 
-  const headerAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      opacity: interpolate(scrollOffset.value, [0, IMG_HEIGHT / 1.5], [0, 1]),
-    };
-  }, []);
+  // const headerAnimatedStyle = useAnimatedStyle(() => {
+  //   return {
+  //     opacity: interpolate(scrollOffset.value, [0, IMG_HEIGHT / 1.5], [0, 1]),
+  //   };
+  // }, []);
+  const [loading, setLoading] = useState(true);
+  const imageOpacity = new Animated.Value(0);
+
+  const handleLoad = () => {
+    setLoading(false);
+    Animated.timing(imageOpacity, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
 
   return (
     <View style={styles.container}>
@@ -114,12 +117,21 @@ const ListingId = () => {
         ref={scrollRef}
         scrollEventThrottle={16}
       >
-        <Animated.Image
-          source={{ uri: listing.xl_picture_url }}
-          style={[styles.image, imageAnimatedStyle]}
-          resizeMode="cover"
-        />
-
+        <View style={styles.imageWrapper}>
+          {loading && (
+            <View style={styles.placeholder}>
+              <ActivityIndicator size="small" color="#999" />
+            </View>
+          )}
+          <Animated.Image
+            source={{ uri: listing.xl_picture_url }}
+            style={[styles.image, imageAnimatedStyle]}
+            resizeMode="cover"
+            onLoadStart={() => setLoading(true)}
+            onLoad={handleLoad}
+            onError={() => setLoading(false)}
+          />
+        </View>
         <View style={styles.infoContainer}>
           <Text style={styles.name}>{listing.name}</Text>
           <Text style={styles.location}>
@@ -192,7 +204,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "white",
   },
+  imageWrapper: {
+    width: "100%",
+    height: 200,
+    position: "relative",
+    backgroundColor: "#eee",
+  },
+  placeholder: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f0f0f0",
+  },
   image: {
+    ...StyleSheet.absoluteFillObject,
     height: IMG_HEIGHT,
     width: width,
   },
