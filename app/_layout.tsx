@@ -41,7 +41,7 @@ function InitialLayout({ isSignedIn }: { isSignedIn: boolean }) {
     if (!isSignedIn) {
       router.push("/(modals)/login");
     } else {
-      router.push("/(tabs)/inbox");
+      router.push("/(tabs)");
     }
     SplashScreen.hideAsync();
   }, [isSignedIn]);
@@ -83,7 +83,14 @@ function InitialLayout({ isSignedIn }: { isSignedIn: boolean }) {
           ),
         }}
       />
-      <Stack.Screen name="listing/[id]" options={{ headerTitle: "" }} />
+      <Stack.Screen
+        name="listing/[id]"
+        options={{
+          headerTitle: "",
+          headerBackButtonMenuEnabled: true,
+          headerTransparent: true,
+        }}
+      />
     </Stack>
   );
 }

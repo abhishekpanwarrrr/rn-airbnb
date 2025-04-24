@@ -1,22 +1,33 @@
 import { View, Text } from "react-native";
-import React from "react";
-import { Link } from "expo-router";
+import React, { useMemo, useState } from "react";
+import { Link, Stack } from "expo-router";
+import ExploreHeader from "@/components/ExploreHeader";
+import Listings from "@/components/Listings";
+import listingsData from "@/assets/data/airbnb-listings.json";
 
-const Index = () => {
+const Page = () => {
+  const [category, setCategory] = useState<string>("Tiny homes");
+  const items = useMemo(() => listingsData as any, []);
+
+  const onDataChanged = (category: string) => {
+    setCategory(category);
+  };
+
   return (
     <View
       style={{
         flex: 1,
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 30,
+        marginTop: 135,
       }}
     >
-      <Link href={"/(modals)/login"}>Login</Link>
-      <Link href={"/(modals)/booking"}>Bookings</Link>
+      <Stack.Screen
+        options={{
+          header: () => <ExploreHeader onCategoryChanged={onDataChanged} />,
+        }}
+      />
+      <Listings listings={items} category={category} />
     </View>
   );
 };
 
-export default Index;
+export default Page;
