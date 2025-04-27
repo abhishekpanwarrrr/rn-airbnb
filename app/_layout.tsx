@@ -63,7 +63,7 @@ function InitialLayout({ isSignedIn }: { isSignedIn: boolean }) {
       <Stack.Screen
         name="(modals)/booking"
         options={{
-          presentation: "transparentModal",
+          presentation: "modal",
           animation: "fade",
           headerTransparent: true,
           headerTitle: (props) => <ModalHeaderText />,
